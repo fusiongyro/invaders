@@ -1,7 +1,13 @@
 local Game = {}
 
 function Game.create(player)
-  return setmetatable({entities = {}, player = player}, {__index = Game})
+  local inst = {entities = {}, enemies = {}, player = player}
+  return setmetatable(inst, {__index = Game})
+end
+
+function Game:insertEnemy(enemy)
+  self:insertEntity(enemy)
+  table.insert(self.enemies, enemy)
 end
 
 function Game:insertEntity(entity)
@@ -15,7 +21,7 @@ end
 function Game:update(dt)
   -- update the entities that exist
   for i, entity in ipairs(self.entities) do
-    entity:update(self, dt, i)
+    if entity.update then entity:update(self, dt, i) end
   end
   self.player:update(self, dt)
 end
