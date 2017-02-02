@@ -1,33 +1,32 @@
--- this is just here to document the actual Space Shooter Redux assets I
--- actually use; in the end I will try to delete the unnecessary ones.
-function asset(asset)
-  return asset
-end
+local Game = require "game"
+local Player = require "player"
 
-function love.load()
-  gunsound = love.audio.newSource(asset("Bonus/sfx_laser1.ogg"), "static")
+local game
 
-  player = {
-    sprite = love.graphics.newImage(asset("PNG/playerShip1_blue.png")),
-    x = 250,
-    y = 500,
-    orientation = 0
-  }
-end
-
-function love.update(dt)
-  require("lurker").update()
-  require("lovebird").update()
-  
-  if love.keyboard.isDown("space") then
-    gunsound:play()
-  elseif love.keyboard.isDown("left") then
-    player.x = player.x - 1000 * dt
-  elseif love.keyboard.isDown("right") then
-    player.x = player.x + 1000 * dt
+function addKeypressHandler(handler)
+  local previous = love.keyreleased
+  love.keyreleased = function (key)
+    handler(key)
+    if previous then previous(key) end
   end
 end
 
-function love.draw()
-  love.graphics.draw(player.sprite, player.x, player.y)
+love.load = function()
+  local player = Player.create()
+  game = Game.create(player)
+
+  -- handle the space key
+  addKeypressHandler(function(key)
+    if key == 'space' then player:fireMissile(game) end
+  end)
+end
+
+love.update = function(dt)
+  require("lib.lurker").update()
+  require("lib.lovebird").update()
+  game:update(dt)
+end
+
+love.draw = function()
+  game:draw(dt)
 end
